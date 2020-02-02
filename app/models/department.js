@@ -5,15 +5,10 @@ const departmentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    // owner:{//the manager of the department
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref:"User",
-    //     required: true
-    // },
-    manager:{
-        type:mongoose.Schema.Types.ObjectId,
+    owner:{//the manager of the department
+        type: mongoose.Schema.Types.ObjectId,
         ref:"User",
-        required:true
+        required: true
     },
     employees:[{
         type:mongoose.Schema.Types.ObjectId,
