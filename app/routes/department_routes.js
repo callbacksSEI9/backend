@@ -31,14 +31,14 @@ router.get('/departments/:department_id',requireToken,(req,res,next)=>{
     Department.findById(req.params.department_id)
     .then(handle404)
     .then(department => {
-        requireOwnership(req,department)
+        // requireOwnership(req,department)
         res.status(200).json({department:department.toObject()})
     })
     .catch(next)
 })
 
 router.post('/departments',requireToken,(req,res,next)=>{
-    req.body.department.owner = req.user.id
+    // req.body.department.owner = req.user.id
     Department.create(req.body.department)
     .then(department =>{
         res.status(201).json({department:department.toObject()})
@@ -46,11 +46,11 @@ router.post('/departments',requireToken,(req,res,next)=>{
     .catch(next)
 })
 router.patch('/departments/:department_id',requireToken,(req,res,next)=>{
-    delete req.body.department.owner
+    // delete req.body.department.owner
     Department.findById(req.body.department_id)
     .then(handle404)
     .then(department =>{
-        requireOwnership(req,department)
+        // requireOwnership(req,department)
         return department.update(req.body.department)
     })
     .then(()=>res.status(204))
@@ -61,7 +61,7 @@ router.delete('/departments/:department_id',requireToken,(req,res,next)=>{
     Department.findById(req.params.department_id)
     .then(handle404)
     .then(department => {
-        requireOwnership(req,department)
+        // requireOwnership(req,department)
         department.remove()
     })
     .then(()=> res.sendstatus(204))
