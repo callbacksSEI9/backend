@@ -19,13 +19,11 @@ const taskSchema = new mongoose.Schema({
       time: Number
   }]
   ,
-   status: {
-    done: true,
-    undone: false
-
-},
+  status:{
+    type:Boolean,
+  },
   time: {
-      type: Number
+      type: String
   },
 }, 
 {

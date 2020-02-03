@@ -2,7 +2,7 @@
 const express = require('express')
 const passport = require('passport')
 
-const task = require('../models/task')
+const Task = require('../models/task')
 
 const customErrors = require('../../lib/custom_errors')
 
@@ -19,8 +19,8 @@ const router = express.Router()
 // GET /examples
 router.get('/tasks', requireToken, (req, res, next) => {
   
-  task.find({owner: req.user.id})
-    .then(task => res.status(200).json({tasks:tasks}))
+  Task.find({owner: req.user.id})
+    .then(tasks => res.status(200).json({tasks:tasks}))
     .catch(next)
   
 })
@@ -40,9 +40,12 @@ router.get('/tasks/:id', requireToken, (req, res, next) => {
 // CREATE
 // POST /examples
 router.post('/tasks', requireToken, (req, res, next) => {
-  req.body.task.owner = req.user.id
-
-  Tasks.create(req.body.task)
+  console.log('xxxx')
+  const userId = req.user._id
+  const newTask = req.body.task
+  newTask.owner = userId
+  console.log(newTask)
+  Task.create(newTask)
     .then(task => {
       res.status(201).json({ task: task.toObject() })
     })
