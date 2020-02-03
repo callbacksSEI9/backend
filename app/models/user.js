@@ -10,8 +10,28 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  token: String
-}, {
+  token: String,
+  name: {
+    type: String,
+    required: true
+  },
+  master:{
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  manager:{
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  assigned:{
+    type: Boolean,
+    required: true,
+    default: false
+  }
+}, 
+{
   timestamps: true,
   toObject: {
     // remove `hashedPassword` field when we call `.toObject`
