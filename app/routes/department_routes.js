@@ -32,14 +32,14 @@ const User = require('../models/user')
 // })
 //show route
 //method get
-router.get('/departments',requireToken,(req,res,next)=>{
+router.get('/departments',(req,res,next)=>{
     let employees=[]
-    Department.find({owner:req.user.id})
+    Department.findById("5e395ded1a26b34da878b55f")
     .then(handle404)
-    .then(department => {
-        requireOwnership(req,department)
-        // return department
-    })
+    // .then(department => {
+    //     // requireOwnership(req,department)
+    //     // return department
+    // })
     .then(department => {
          department.employees.forEach(employee =>{
             User.findOne({_id:employee})
