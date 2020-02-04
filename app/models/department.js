@@ -12,11 +12,10 @@ const departmentSchema = new mongoose.Schema({
     },
     employees:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        required: true
+        ref:"User"
     }]
 
-})
+},{ usePushEach: true })
 
 const DepartmentModel = mongoose.model("Department",departmentSchema)
 
