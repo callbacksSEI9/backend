@@ -40,7 +40,6 @@ router.get('/tasks/:id', requireToken, (req, res, next) => {
 // CREATE
 // POST /examples
 router.post('/tasks', requireToken, (req, res, next) => {
-  console.log('xxxx')
   const userId = req.user._id
   const newTask = req.body.task
   newTask.owner = userId
