@@ -65,7 +65,6 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(requestLogger)
 
 // register route files
-app.use(exampleRoutes)
 app.use(userRoutes)
 app.use(taskRoutes)
 app.use(departmentRoutes)
