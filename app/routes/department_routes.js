@@ -7,6 +7,7 @@ const Department = require("../models/department")
 // this is a collection of methods that help us detect situations when we need
 // to throw a custom error
 const customErrors = require("../../lib/custom_errors")
+const BadCredentialsError = customErrors.BadCredentialsError
 // we'll use this function to send 404 when non-existant document is requested
 const handle404 = customErrors.handle404
 // we'll use this function to send 401 when a user tries to modify a resource
@@ -22,109 +23,58 @@ const router = express.Router()
 //require model user
 const User = require('../models/user')
 
-
-//index route
-//method get
-// router.get('/departments',requireToken,(req,res,next)=>{
-//     Department.find({owner: req.user.id})
-//     .then(departments => res.status(200).json({departments:departments}))
-//     .catch(next)
-// })
-//show route
-//method get
-router.get('/departments',(req,res,next)=>{
+router.get('/departments',requireToken,(req,res,next)=>{
     let employees=[]
-    Department.findById("5e395ded1a26b34da878b55f")
+    Department.find({owner: req.user._id})
     .then(handle404)
-    // .then(department => {
-    //     // requireOwnership(req,department)
-    //     // return department
-    // })
-    .then(department => {
-         department.employees.forEach(employee =>{
-            User.findOne({_id:employee})
-            .then((employee)=>{
-                 employees.push(employee)// here you are trying to save the employee inside employees array to list it
-                 return employees
-            }).then((employees)=>{
-                res.status(200).json({employees:employees})
-            })
-        })
-        // return employees
+    .then((department)=> {
+// console.log(department[0]._doc.owner)
+// requireOwnership(req,department[0]._doc)
+        return department
     })
-    
+    .then(department => {
+        department[0]._doc.employees.forEach(function(employee) {
+            employees.push( User.findOne({_id:employee}));
+        });
+        Promise.all(employees).then(function(responses) {
+// responses will come as array of them
+// return json file after everything finishes
+           res.status(200).json({responses:responses})
+        }).catch(function(reason) {
+// catch all the errors
+           console.log(reason);
+        })
+        return employees
+    })
     .catch(next)
 })
 
-//create route
-//method post
-// router.post('/departments',requireToken,(req,res,next)=>{
-//     // req.body.department.owner = req.user._id
-//     const userId = req.user._id
-//     const newDepartment = req.body.department
-//     newDepartment.owner = userId
-//     Department.create(newDepartment)
-//     .then(department =>{
-//         res.status(201).json({department: department.toObject()})
-//     })
-//     .catch(next)
-// })
-
 //creat employee in department route
 //method post
-router.post('/departments/:departmentId', (req, res,next)=> {
+router.post('/departments',requireToken, (req, res,next)=> {
     let employee
-    // const departmentId = req.params.departmentId
-    
-    // .then((department)=> {
-        createEmployee = User.findOne({email: req.body.credentials.email})
-        .then(record =>{
-            // if we didn't find a user with that email, send 401
+     User.findOne({email: req.body.credentials.email})
+    .then(record =>{
+// if we didn't find a user with that email, send 401
         if (!record) {
             throw new BadCredentialsError()
         }
-        employee = record._doc //after finding the user we want to add as employee save it in employee variable
+//after finding the user we want to add as employee save it in employee variable
+        employee = record._doc 
         })
-    //find the department we want to add employee to it
-    Department.findOne({_id:req.params.departmentId})
+//find the department we want to add employee to it
+    Department.find({owner: req.user.id})
     .then((department)=> {
-        //push employee in department's employees array
-        department.employees.push(employee)
+//push employee in department's employees array
+        department[0]._doc.employees.push(employee)
         return department
     })
-    //save changes in department
-    .then(department => department.save()) 
+//save changes in department
+    .then(department => department[0].save()) 
         .then((employeeAddedToDepartment)=> {
             res.status(201).json({department:employeeAddedToDepartment.toObject()})
         })
     .catch(next)
 })
-
-//update route
-//method patch
-// router.patch('/departments/:department_id',requireToken,(req,res,next)=>{
-//     delete req.body.department.owner
-//     Department.findById(req.body.department_id)
-//     .then(handle404)
-//     .then(department =>{
-//         requireOwnership(req,department)
-//         return department.update(req.body.department)
-//     })
-//     .then(()=>res.status(204))
-//     .catch(next)
-// })
-
-//delete route
-//method delete
-// router.delete('/departments/:department_id',requireToken,(req,res,next)=>{
-//     Department.findById(req.params.department_id)
-//     .then(handle404)
-//     .then(department => {
-//         requireOwnership(req,department)
-//         department.remove()
-//     })
-//     .then(()=> res.sendstatus(204))
-//     .catch(next)
-// })
 
 module.exports = router
