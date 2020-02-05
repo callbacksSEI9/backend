@@ -16,6 +16,7 @@ const BadParamsError = errors.BadParamsError
 const BadCredentialsError = errors.BadCredentialsError
 
 const User = require('../models/user')
+const Department = require('../models/department')
 
 // passing this as a second argument to `router.<verb>` will make it
 // so that a token MUST be passed for that route to be available
@@ -129,6 +130,89 @@ router.patch('/change-password', requireToken, (req, res, next) => {
     // pass any errors along to the error handler
     .catch(next)
 })
+
+router.patch('/assign-user', requireToken,(req, res, next)=>{
+    if(req.user.manager){
+      User.findById(req.body.id)
+      .then(user =>{
+        !user.assigned ? 
+        Department.find({owner: req.user._id})
+        .then((department) => {
+          department.employees.push(user)
+          department.save()
+        })
+        .then(()=>{
+          user.assigned = true
+          user.save()
+        })
+        .then(() => res.sendStatus(204))
+        .catch(next)
+      :''})
+    }
+})
+
+
+router.patch('/unassign-user', requireToken,(req, res, next)=>{
+  if(req.user.manager){
+    User.findById(req.body.id)
+    .then(user =>{
+      user.assigned ? 
+      Department.find({owner: req.user._id})
+      .then((department) => {
+        department.employees.splice(user)
+        department.save()
+      })
+      .then(()=>{
+        user.assigned = false
+        user.save()
+      })
+      .then(() => res.sendStatus(204))
+      .catch(next)
+    :''})
+  }
+})
+
+router.patch('/assign-manager', requireToken,(req, res, next)=>{
+  if(req.user.master){
+    User.findById(req.body.userId)
+    .then(user =>{
+      !user.manager ? 
+      Department.find({owner: req.body.departmentId})
+      .then((department) => {
+        department.owner = user._id
+        department.save()
+      })
+      .then(()=>{
+        user.manager = true
+        user.save()
+      })
+      .then(() => res.sendStatus(204))
+      .catch(next)
+    :''})
+  }
+})
+
+
+router.patch('/unassign-manager', requireToken,(req, res, next)=>{
+  if(req.user.master){
+    User.findById(req.body.userId)
+    .then(user =>{
+      user.manager ? 
+      Department.find({owner: req.body.departmentId})
+      .then((department) => {
+        department.owner = ''
+        department.save()
+      })
+      .then(()=>{
+        user.manager = false
+        user.save()
+      })
+      .then(() => res.sendStatus(204))
+      .catch(next)
+    :''})
+  }
+})
+
 
 router.delete('/sign-out', requireToken, (req, res, next) => {
   // create a new random token for the user, invalidating the current one

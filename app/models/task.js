@@ -20,7 +20,7 @@ const taskSchema = new mongoose.Schema({
   }]
   ,
   status:{
-    type:Boolean,
+    type: String,
   },
   time: {
       type: String
