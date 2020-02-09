@@ -17,21 +17,8 @@ const router = express.Router()
 
 // INDEX
 // GET /examples
-router.post('/mytasks', requireToken, (req, res, next) => {
-  if(req.body.status == 'none'){
-  Task.find({owner: req.user.id})
-    .then(tasks => res.status(200).json({tasks:tasks}))
-    .catch(next)
-  }
-  else{
-    Task.find({owner: req.user.id, status: req.body.status})
-      .then(tasks => res.status(200).json({tasks:tasks}))
-      .catch(next)
-    }
-  
-})
 
-router.post('/tasks', requireToken, (req, res, next) => {
+router.post('/gettasks', requireToken, (req, res, next) => {
   if (req.body.status == 'none'){
   Task.find()
     .then(tasks => res.status(200).json({tasks:tasks}))
@@ -59,12 +46,11 @@ router.post('/tasks/:id', requireToken, (req, res, next) => {
 
 // CREATE
 // POST /examples
-router.post('/tasks', requireToken, (req, res, next) => {
+router.post('/newtasks', requireToken, (req, res, next) => {
   const userId = req.user._id
   const newTask = req.body.task
   newTask.owner = userId
   newTask.status = 'Queued'
-  console.log(newTask)
   Task.create(newTask)
     .then(task => {
       res.status(201).json({ task: task.toObject() })
