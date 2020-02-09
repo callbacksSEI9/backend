@@ -23,9 +23,9 @@ const router = express.Router()
 //require model user
 const User = require('../models/user')
 
-router.get('/departments',requireToken,(req,res,next)=>{
+router.get('/departments/:ownerid',(req,res,next)=>{
     let employees=[]
-    Department.find({owner: req.user._id})
+    Department.find({owner: req.params.ownerid})
     .then(handle404)
     .then((department)=> {
 // console.log(department[0]._doc.owner)
@@ -40,7 +40,8 @@ router.get('/departments',requireToken,(req,res,next)=>{
 // responses will come as array of them
 // return json file after everything finishes
            res.status(200).json({responses:responses})
-        }).catch(function(reason) {
+        })
+        .catch(function(reason) {
 // catch all the errors
            console.log(reason);
         })
@@ -51,7 +52,7 @@ router.get('/departments',requireToken,(req,res,next)=>{
 
 //creat employee in department route
 //method post
-router.post('/departments',requireToken, (req, res,next)=> {
+router.post('/departments/:ownerid', (req, res,next)=> {
     let employee
      User.findOne({email: req.body.credentials.email})
     .then(record =>{
@@ -60,21 +61,23 @@ router.post('/departments',requireToken, (req, res,next)=> {
             throw new BadCredentialsError()
         }
 //after finding the user we want to add as employee save it in employee variable
-        employee = record._doc 
+       return employee = record._doc 
         })
 //find the department we want to add employee to it
-    Department.find({owner: req.user.id})
-    .then((department)=> {
+   .then(()=>{
+       Department.find({owner: req.params.ownerid})
+   .then((department)=> {
 //push employee in department's employees array
-        department[0]._doc.employees.push(employee)
-        return department
-    })
+       department[0]._doc.employees.push(employee)
+       return department
+   })
 //save changes in department
-    .then(department => department[0].save()) 
-        .then((employeeAddedToDepartment)=> {
-            res.status(201).json({department:employeeAddedToDepartment.toObject()})
-        })
-    .catch(next)
+   .then(department => department[0].save()) 
+       .then((employeeAddedToDepartment)=> {
+           res.status(201).json({department:employeeAddedToDepartment.toObject()})
+       })
+   .catch(next)
+    }) 
 })
 
 module.exports = router
